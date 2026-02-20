@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Parsing Cost Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-card: #1a1a3e;
+            --bg-card-hover: #222255;
+            --accent-blue: #4fc3f7;
+            --accent-purple: #b388ff;
+            --accent-pink: #f48fb1;
+            --accent-green: #69f0ae;
+            --accent-orange: #ffb74d;
+            --text-primary: #e8e8f0;
+            --text-muted: #9999bb;
+            --slider-track: #2a2a5a;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Bubble Background ── */
+        .bubbles-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(100vh) scale(0.3); opacity: 0; }
+            10%  { opacity: 0.08; }
+            90%  { opacity: 0.08; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ── Layout ── */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ── Slider Cards ── */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .control-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(79, 195, 247, 0.12);
+            border-radius: 16px;
+            padding: 28px 28px 24px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .control-card:hover {
+            border-color: rgba(79, 195, 247, 0.3);
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.06);
+        }
+
+        .control-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 18px;
+        }
+
+        .control-label h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .value-blue   { color: var(--accent-blue); }
+        .value-purple { color: var(--accent-purple); }
+        .value-pink   { color: var(--accent-pink); }
+
+        .complexity-description {
+            margin-top: 12px;
+            padding: 10px 16px;
+            background: rgba(179, 136, 255, 0.08);
+            border-left: 3px solid var(--accent-purple);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            transition: all 0.3s;
+        }
+
+        /* ── Custom Range Slider ── */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--slider-track);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            transition: transform 0.15s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        }
+
+        #complexity-slider::-webkit-slider-thumb { background: var(--accent-purple); }
+        #pdfs-slider::-webkit-slider-thumb       { background: var(--accent-blue); }
+        #pages-slider::-webkit-slider-thumb       { background: var(--accent-pink); }
+
+        #complexity-slider::-moz-range-thumb { background: var(--accent-purple); }
+        #pdfs-slider::-moz-range-thumb       { background: var(--accent-blue); }
+        #pages-slider::-moz-range-thumb       { background: var(--accent-pink); }
+
+        /* ── Results ── */
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(79, 195, 247, 0.1);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        .result-card h4 {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .result-range {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .result-amount {
+            font-size: 1.9rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .result-separator {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .amount-low  { color: var(--accent-green); }
+        .amount-high { color: var(--accent-orange); }
+
+        .result-card .result-sub {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Breakdown Panel ── */
+        .breakdown {
+            background: var(--bg-card);
+            border: 1px solid rgba(79, 195, 247, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .breakdown h3 {
+            font-size: 1.15rem;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 40px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .breakdown-item span:first-child {
+            color: var(--text-muted);
+        }
+
+        .breakdown-item span:last-child {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Bar visual ── */
+        .cost-bar-section {
+            margin-top: 28px;
+        }
+
+        .cost-bar-section h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .cost-bar-wrapper {
+            background: var(--slider-track);
+            border-radius: 8px;
+            height: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cost-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue), var(--accent-purple));
+            min-width: 4px;
+        }
+
+        .cost-bar-label {
+            margin-top: 6px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .controls { grid-template-columns: 1fr; }
+            .results  { grid-template-columns: 1fr; }
+            .breakdown-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bubbles-container" id="bubbles"></div>
+
+<div class="container">
+    <header>
+        <h1>PDF Parsing Cost Calculator</h1>
+        <p>Adjust the sliders below to explore estimated costs based on volume, page count, and document complexity.</p>
+    </header>
+
+    <!-- ── Controls ── -->
+    <div class="controls">
+        <div class="control-card">
+            <div class="control-label">
+                <h3>PDFs per Month</h3>
+                <span class="control-value value-blue" id="pdfs-value">50</span>
+            </div>
+            <input type="range" id="pdfs-slider" min="1" max="1000" value="50">
+        </div>
+
+        <div class="control-card">
+            <div class="control-label">
+                <h3>Pages per PDF</h3>
+                <span class="control-value value-pink" id="pages-value">5</span>
+            </div>
+            <input type="range" id="pages-slider" min="1" max="1000" value="5">
+        </div>
+
+        <div class="control-card full-width">
+            <div class="control-label">
+                <h3>Document Complexity</h3>
+                <span class="control-value value-purple" id="complexity-value">1</span>
+            </div>
+            <input type="range" id="complexity-slider" min="1" max="10" value="1">
+            <div class="complexity-description" id="complexity-desc">
+                Simple table data (one product per row)
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Result Cards ── -->
+    <div class="results">
+        <div class="result-card">
+            <h4>Cost per PDF</h4>
+            <div class="result-range">
+                <span class="result-amount amount-low" id="cost-per-pdf-low">$0.05</span>
+                <span class="result-separator">&ndash;</span>
+                <span class="result-amount amount-high" id="cost-per-pdf-high">$0.16</span>
+            </div>
+            <div class="result-sub" id="cost-per-page-info">$0.010 – $0.032 per page</div>
+        </div>
+
+        <div class="result-card">
+            <h4>Monthly Cost</h4>
+            <div class="result-range">
+                <span class="result-amount amount-low" id="monthly-low">$2.50</span>
+                <span class="result-separator">&ndash;</span>
+                <span class="result-amount amount-high" id="monthly-high">$8.00</span>
+            </div>
+            <div class="result-sub" id="total-pages-info">250 total pages / month</div>
+        </div>
+
+        <div class="result-card">
+            <h4>Yearly Estimate</h4>
+            <div class="result-range">
+                <span class="result-amount amount-low" id="yearly-low">$30.00</span>
+                <span class="result-separator">&ndash;</span>
+                <span class="result-amount amount-high" id="yearly-high">$96.00</span>
+            </div>
+            <div class="result-sub">Based on consistent monthly volume</div>
+        </div>
+    </div>
+
+    <!-- ── Breakdown ── -->
+    <div class="breakdown">
+        <h3>Cost Breakdown</h3>
+        <div class="breakdown-grid">
+            <div class="breakdown-item">
+                <span>Base cost per page (simple)</span>
+                <span>$0.010 – $0.032</span>
+            </div>
+            <div class="breakdown-item">
+                <span>Complexity multiplier</span>
+                <span id="breakdown-multiplier">1.00x</span>
+            </div>
+            <div class="breakdown-item">
+                <span>Effective cost per page</span>
+                <span id="breakdown-eff-cost">$0.010 – $0.032</span>
+            </div>
+            <div class="breakdown-item">
+                <span>Pages per PDF</span>
+                <span id="breakdown-pages">5</span>
+            </div>
+            <div class="breakdown-item">
+                <span>PDFs per month</span>
+                <span id="breakdown-pdfs">50</span>
+            </div>
+            <div class="breakdown-item">
+                <span>Total pages per month</span>
+                <span id="breakdown-total-pages">250</span>
+            </div>
+        </div>
+
+        <div class="cost-bar-section">
+            <h4>Monthly cost relative to $1,000 budget</h4>
+            <div class="cost-bar-wrapper">
+                <div class="cost-bar-fill" id="cost-bar" style="width: 0.8%"></div>
+            </div>
+            <div class="cost-bar-label" id="cost-bar-label">$8.00 high est. / $1,000 (0.8%)</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Bubbles ──
+    (function createBubbles() {
+        const container = document.getElementById('bubbles');
+        const colors = ['#4fc3f7', '#b388ff', '#f48fb1', '#69f0ae', '#ffb74d'];
+        for (let i = 0; i < 30; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 120 + 30;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = Math.random() * 100 + '%';
+            bubble.style.background = color;
+            bubble.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            bubble.style.animationDelay = (Math.random() * 20) + 's';
+            container.appendChild(bubble);
+        }
+    })();
+
+    // ── Complexity labels ──
+    const LABELS = {
+        1: "Simple table data (one product per row)",
+        2: "Basic structured text & lists",
+        3: "Simple mixed content (text + tables)",
+        4: "Standard business documents",
+        5: "Multi-section reports",
+        6: "Complex tables with nested data",
+        7: "Mixed media with charts & graphs",
+        8: "Dense technical documents",
+        9: "Complex multi-layout pages",
+        10: "Highly complex (nested tables, images, mixed layouts)"
+    };
+
+    // ── Elements ──
+    const pdfsSlider       = document.getElementById('pdfs-slider');
+    const pagesSlider      = document.getElementById('pages-slider');
+    const complexitySlider = document.getElementById('complexity-slider');
+
+    const pdfsValue       = document.getElementById('pdfs-value');
+    const pagesValue      = document.getElementById('pages-value');
+    const complexityValue = document.getElementById('complexity-value');
+    const complexityDesc  = document.getElementById('complexity-desc');
+
+    // ── Debounced API call ──
+    let debounceTimer;
+
+    function recalculate() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fetchResults, 60);
+    }
+
+    async function fetchResults() {
+        const complexity = parseInt(complexitySlider.value);
+        const numPdfs    = parseInt(pdfsSlider.value);
+        const pages      = parseInt(pagesSlider.value);
+
+        // Update displayed values immediately
+        pdfsValue.textContent       = numPdfs.toLocaleString();
+        pagesValue.textContent      = pages.toLocaleString();
+        complexityValue.textContent = complexity;
+        complexityDesc.textContent  = LABELS[complexity];
+
+        try {
+            const res = await fetch('/api/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ complexity, num_pdfs: numPdfs, pages })
+            });
+            const d = await res.json();
+
+            // Result cards
+            document.getElementById('cost-per-pdf-low').textContent  = fmt(d.cost_per_pdf_low);
+            document.getElementById('cost-per-pdf-high').textContent = fmt(d.cost_per_pdf_high);
+            document.getElementById('monthly-low').textContent       = fmt(d.monthly_low);
+            document.getElementById('monthly-high').textContent      = fmt(d.monthly_high);
+            document.getElementById('yearly-low').textContent        = fmt(d.yearly_low);
+            document.getElementById('yearly-high').textContent       = fmt(d.yearly_high);
+            document.getElementById('cost-per-page-info').textContent =
+                `$${d.cost_per_page_low.toFixed(3)} – $${d.cost_per_page_high.toFixed(3)} per page`;
+            document.getElementById('total-pages-info').textContent =
+                `${d.total_pages_per_month.toLocaleString()} total pages / month`;
+
+            // Breakdown
+            document.getElementById('breakdown-multiplier').textContent   = d.complexity_multiplier.toFixed(2) + 'x';
+            document.getElementById('breakdown-eff-cost').textContent     =
+                `$${d.cost_per_page_low.toFixed(3)} – $${d.cost_per_page_high.toFixed(3)}`;
+            document.getElementById('breakdown-pages').textContent        = pages.toLocaleString();
+            document.getElementById('breakdown-pdfs').textContent         = numPdfs.toLocaleString();
+            document.getElementById('breakdown-total-pages').textContent  = d.total_pages_per_month.toLocaleString();
+
+            // Cost bar (relative to $1000)
+            const pct = Math.min((d.monthly_high / 1000) * 100, 100);
+            document.getElementById('cost-bar').style.width    = Math.max(pct, 0.3) + '%';
+            document.getElementById('cost-bar-label').textContent =
+                `${fmt(d.monthly_high)} high est. / $1,000 (${pct.toFixed(1)}%)`;
+
+        } catch (err) {
+            console.error('Calculation error:', err);
+        }
+    }
+
+    function fmt(val) {
+        if (val >= 1000) return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        if (val >= 100)  return '$' + val.toFixed(0);
+        return '$' + val.toFixed(2);
+    }
+
+    // ── Event listeners ──
+    pdfsSlider.addEventListener('input', recalculate);
+    pagesSlider.addEventListener('input', recalculate);
+    complexitySlider.addEventListener('input', recalculate);
+
+    // Initial load
+    fetchResults();
+</script>
+</body>
+</html>
