@@ -313,7 +313,118 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* ── Bar visual ── */
+        /* ── Pie Chart ── */
+        .cost-chart-section {
+            margin-top: 28px;
+        }
+
+        .cost-chart-section > h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .chart-layout {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .pie-chart-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            flex-shrink: 0;
+        }
+
+        .pie-chart {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .pie-track {
+            fill: none;
+            stroke: var(--dial-track);
+            stroke-width: 28;
+        }
+
+        .pie-segment {
+            fill: none;
+            stroke-width: 28;
+            stroke-linecap: butt;
+            transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease;
+        }
+
+        .pie-center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .pie-center-label .pie-total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pie-center-label .pie-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .chart-legend {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-label {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .legend-pct {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .legend-detail {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+            margin-left: 26px;
+            margin-top: -6px;
+        }
+
+        /* ── Segmented Budget Bar ── */
         .cost-bar-section {
             margin-top: 28px;
         }
@@ -332,14 +443,21 @@
             height: 32px;
             position: relative;
             overflow: hidden;
+            display: flex;
         }
 
-        .cost-bar-fill {
+        .cost-bar-segment {
             height: 100%;
-            border-radius: 8px;
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue), var(--accent-purple));
-            min-width: 4px;
+            min-width: 0;
+        }
+
+        .cost-bar-segment:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .cost-bar-segment:last-child {
+            border-radius: 0 8px 8px 0;
         }
 
         .cost-bar-label {
@@ -356,6 +474,8 @@
             .breakdown-grid { grid-template-columns: 1fr; }
             header h1 { font-size: 1.8rem; }
             .dial-wrapper { width: 140px; height: 140px; }
+            .chart-layout { flex-direction: column; }
+            .pie-chart-wrapper { width: 160px; height: 160px; }
         }
     </style>
 </head>
@@ -486,10 +606,56 @@
             </div>
         </div>
 
+        <div class="cost-chart-section">
+            <h4>Cost Factor Contribution</h4>
+            <div class="chart-layout">
+                <div class="pie-chart-wrapper">
+                    <svg class="pie-chart" viewBox="0 0 200 200">
+                        <circle class="pie-track" cx="100" cy="100" r="70"/>
+                        <circle class="pie-segment" id="seg-pdfs" cx="100" cy="100" r="70" stroke="var(--accent-blue)"/>
+                        <circle class="pie-segment" id="seg-pages" cx="100" cy="100" r="70" stroke="var(--accent-pink)"/>
+                        <circle class="pie-segment" id="seg-complexity" cx="100" cy="100" r="70" stroke="var(--accent-purple)"/>
+                    </svg>
+                    <div class="pie-center-label">
+                        <div class="pie-total" id="pie-total">$8.00</div>
+                        <div class="pie-label">Monthly High</div>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: var(--accent-blue)"></span>
+                            <span class="legend-label">PDF Volume</span>
+                            <span class="legend-pct value-blue" id="pct-pdfs">59%</span>
+                        </div>
+                        <div class="legend-detail" id="detail-pdfs">50 PDFs / month</div>
+                    </div>
+                    <div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: var(--accent-pink)"></span>
+                            <span class="legend-label">Page Count</span>
+                            <span class="legend-pct value-pink" id="pct-pages">24%</span>
+                        </div>
+                        <div class="legend-detail" id="detail-pages">5 pages / PDF</div>
+                    </div>
+                    <div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: var(--accent-purple)"></span>
+                            <span class="legend-label">Complexity</span>
+                            <span class="legend-pct value-purple" id="pct-complexity">17%</span>
+                        </div>
+                        <div class="legend-detail" id="detail-complexity">1.00x multiplier</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="cost-bar-section">
             <h4>Monthly cost relative to $1,000 budget</h4>
             <div class="cost-bar-wrapper">
-                <div class="cost-bar-fill" id="cost-bar" style="width: 0.8%"></div>
+                <div class="cost-bar-segment" id="bar-pdfs" style="width: 0; background: var(--accent-blue)"></div>
+                <div class="cost-bar-segment" id="bar-pages" style="width: 0; background: var(--accent-pink)"></div>
+                <div class="cost-bar-segment" id="bar-complexity" style="width: 0; background: var(--accent-purple)"></div>
             </div>
             <div class="cost-bar-label" id="cost-bar-label">$8.00 high est. / $1,000 (0.8%)</div>
         </div>
@@ -696,15 +862,77 @@
             document.getElementById('breakdown-pdfs').textContent         = numPdfs.toLocaleString();
             document.getElementById('breakdown-total-pages').textContent  = d.total_pages_per_month.toLocaleString();
 
-            // Cost bar (relative to $1000)
-            const pct = Math.min((d.monthly_high / 1000) * 100, 100);
-            document.getElementById('cost-bar').style.width    = Math.max(pct, 0.3) + '%';
-            document.getElementById('cost-bar-label').textContent =
-                `${fmt(d.monthly_high)} high est. / $1,000 (${pct.toFixed(1)}%)`;
+            // Pie chart + segmented bar
+            updateCostChart(numPdfs, pages, d.complexity_multiplier, d.monthly_high);
 
         } catch (err) {
             console.error('Calculation error:', err);
         }
+    }
+
+    // ── Pie chart & segmented bar ──
+    const PIE_CIRCUMFERENCE = 2 * Math.PI * 70; // r=70
+
+    function updateCostChart(numPdfs, pages, complexityMult, monthlyHigh) {
+        // Logarithmic decomposition: cost = base * pdfs * pages * complexity
+        // Each factor's "weight" = log(factor), since log(a*b) = log(a) + log(b)
+        const logPdfs       = Math.log(Math.max(numPdfs, 1));
+        const logPages      = Math.log(Math.max(pages, 1));
+        const logComplexity = Math.log(Math.max(complexityMult, 1));
+        const logTotal      = logPdfs + logPages + logComplexity;
+
+        let sharePdfs, sharePages, shareComplexity;
+
+        if (logTotal < 0.001) {
+            // All factors at minimum — equal thirds
+            sharePdfs = sharePages = shareComplexity = 1 / 3;
+        } else {
+            sharePdfs       = logPdfs / logTotal;
+            sharePages      = logPages / logTotal;
+            shareComplexity = logComplexity / logTotal;
+        }
+
+        // ── Update donut chart ──
+        const segPdfs  = sharePdfs * PIE_CIRCUMFERENCE;
+        const segPages = sharePages * PIE_CIRCUMFERENCE;
+        const segComp  = shareComplexity * PIE_CIRCUMFERENCE;
+
+        const elPdfs = document.getElementById('seg-pdfs');
+        const elPages = document.getElementById('seg-pages');
+        const elComp = document.getElementById('seg-complexity');
+
+        // Each segment: dasharray = "arc gap", dashoffset = -(cumulative offset)
+        elPdfs.style.strokeDasharray  = `${segPdfs} ${PIE_CIRCUMFERENCE}`;
+        elPdfs.style.strokeDashoffset = '0';
+
+        elPages.style.strokeDasharray  = `${segPages} ${PIE_CIRCUMFERENCE}`;
+        elPages.style.strokeDashoffset = `${-segPdfs}`;
+
+        elComp.style.strokeDasharray  = `${segComp} ${PIE_CIRCUMFERENCE}`;
+        elComp.style.strokeDashoffset = `${-(segPdfs + segPages)}`;
+
+        // Center label
+        document.getElementById('pie-total').textContent = fmt(monthlyHigh);
+
+        // Legend percentages
+        document.getElementById('pct-pdfs').textContent       = Math.round(sharePdfs * 100) + '%';
+        document.getElementById('pct-pages').textContent      = Math.round(sharePages * 100) + '%';
+        document.getElementById('pct-complexity').textContent  = Math.round(shareComplexity * 100) + '%';
+
+        // Legend details
+        document.getElementById('detail-pdfs').textContent       = `${numPdfs.toLocaleString()} PDFs / month`;
+        document.getElementById('detail-pages').textContent      = `${pages.toLocaleString()} pages / PDF`;
+        document.getElementById('detail-complexity').textContent  = `${complexityMult.toFixed(2)}x multiplier`;
+
+        // ── Segmented budget bar ──
+        const budgetPct = Math.min((monthlyHigh / 1000) * 100, 100);
+
+        document.getElementById('bar-pdfs').style.width       = (sharePdfs * budgetPct).toFixed(3) + '%';
+        document.getElementById('bar-pages').style.width      = (sharePages * budgetPct).toFixed(3) + '%';
+        document.getElementById('bar-complexity').style.width  = (shareComplexity * budgetPct).toFixed(3) + '%';
+
+        document.getElementById('cost-bar-label').textContent =
+            `${fmt(monthlyHigh)} high est. / $1,000 (${budgetPct.toFixed(1)}%)`;
     }
 
     function fmt(val) {
