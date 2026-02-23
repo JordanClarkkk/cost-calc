@@ -718,6 +718,7 @@
             // Pointer events
             this.dragging = false;
             this.lastAngle = null;
+            this._fractional = null;
 
             el.addEventListener('pointerdown', (e) => this.onDown(e));
             window.addEventListener('pointermove', (e) => this.onMove(e));
