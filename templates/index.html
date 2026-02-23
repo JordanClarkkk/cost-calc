@@ -769,17 +769,17 @@
             const range = this.max - this.min;
             const valueDelta = (delta / (2 * Math.PI)) * range;
 
-            let newValue = this.value + valueDelta;
+            // Accumulate from fractional position so small-range dials feel smooth
+            const base = this._fractional !== null ? this._fractional : this.value;
+            let newValue = base + valueDelta;
             newValue = Math.max(this.min, Math.min(this.max, newValue));
+            this._fractional = newValue;
 
-            // Only update if integer value changed (for snappy feel)
-            if (Math.round(newValue) !== this.value) {
-                this.value = Math.round(newValue);
+            const rounded = Math.round(newValue);
+            if (rounded !== this.value) {
+                this.value = rounded;
                 this.render();
                 this.onChange();
-            } else {
-                // Store fractional progress for smooth dragging
-                this._fractional = newValue;
             }
         }
 
