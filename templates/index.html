@@ -8,17 +8,19 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #0f0f23;
-            --bg-card: #1a1a3e;
-            --bg-card-hover: #222255;
-            --accent-blue: #4fc3f7;
-            --accent-purple: #b388ff;
-            --accent-pink: #f48fb1;
-            --accent-green: #69f0ae;
-            --accent-orange: #ffb74d;
-            --text-primary: #e8e8f0;
-            --text-muted: #9999bb;
-            --slider-track: #2a2a5a;
+            --bg-primary: #f0f2f8;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8f9ff;
+            --accent-blue: #4a90d9;
+            --accent-purple: #9b6ddb;
+            --accent-pink: #e06b9a;
+            --accent-green: #3db87a;
+            --accent-orange: #e09050;
+            --text-primary: #2d2d3f;
+            --text-muted: #7a7a9b;
+            --dial-track: #e4e6f0;
+            --shadow-soft: rgba(100, 100, 180, 0.08);
+            --shadow-medium: rgba(100, 100, 180, 0.12);
         }
 
         body {
@@ -43,14 +45,14 @@
         .bubble {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.08;
+            opacity: 0.07;
             animation: floatUp linear infinite;
         }
 
         @keyframes floatUp {
             0%   { transform: translateY(100vh) scale(0.3); opacity: 0; }
-            10%  { opacity: 0.08; }
-            90%  { opacity: 0.08; }
+            10%  { opacity: 0.07; }
+            90%  { opacity: 0.07; }
             100% { transform: translateY(-10vh) scale(1); opacity: 0; }
         }
 
@@ -85,111 +87,135 @@
             margin: 0 auto;
         }
 
-        /* ── Slider Cards ── */
+        /* ── Dial Cards ── */
         .controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 24px;
             margin-bottom: 40px;
         }
 
         .control-card {
             background: var(--bg-card);
-            border: 1px solid rgba(79, 195, 247, 0.12);
-            border-radius: 16px;
-            padding: 28px 28px 24px;
+            border: 1px solid rgba(100, 100, 180, 0.1);
+            border-radius: 20px;
+            padding: 28px 20px 24px;
             transition: border-color 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 16px var(--shadow-soft);
         }
 
         .control-card:hover {
-            border-color: rgba(79, 195, 247, 0.3);
-            box-shadow: 0 0 30px rgba(79, 195, 247, 0.06);
+            border-color: rgba(100, 100, 180, 0.2);
+            box-shadow: 0 4px 30px var(--shadow-medium);
         }
 
-        .control-card.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 18px;
-        }
-
-        .control-label h3 {
-            font-size: 1rem;
+        .control-card h3 {
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 20px;
         }
 
-        .control-value {
-            font-size: 1.8rem;
+        /* ── Circular Dial ── */
+        .dial-wrapper {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-bottom: 12px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dial-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .dial-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .dial-track {
+            fill: none;
+            stroke: var(--dial-track);
+            stroke-width: 10;
+            stroke-linecap: round;
+        }
+
+        .dial-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.08s ease-out;
+            filter: drop-shadow(0 0 6px rgba(0,0,0,0.1));
+        }
+
+        .dial-knob {
+            fill: #ffffff;
+            stroke-width: 3;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+            transition: r 0.15s;
+        }
+
+        .dial-wrapper:hover .dial-knob {
+            r: 12;
+        }
+
+        .dial-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .dial-value {
+            font-size: 2rem;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .dial-unit {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .value-blue   { color: var(--accent-blue); }
         .value-purple { color: var(--accent-purple); }
         .value-pink   { color: var(--accent-pink); }
 
+        .dial-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+            margin-bottom: 4px;
+        }
+
         .complexity-description {
-            margin-top: 12px;
-            padding: 10px 16px;
-            background: rgba(179, 136, 255, 0.08);
+            margin-top: 8px;
+            padding: 8px 14px;
+            background: rgba(155, 109, 219, 0.07);
             border-left: 3px solid var(--accent-purple);
             border-radius: 0 8px 8px 0;
             color: var(--text-muted);
-            font-size: 0.92rem;
+            font-size: 0.82rem;
             transition: all 0.3s;
-        }
-
-        /* ── Custom Range Slider ── */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
+            text-align: left;
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: var(--slider-track);
-            outline: none;
-            cursor: pointer;
         }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-            transition: transform 0.15s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-        }
-
-        #complexity-slider::-webkit-slider-thumb { background: var(--accent-purple); }
-        #pdfs-slider::-webkit-slider-thumb       { background: var(--accent-blue); }
-        #pages-slider::-webkit-slider-thumb       { background: var(--accent-pink); }
-
-        #complexity-slider::-moz-range-thumb { background: var(--accent-purple); }
-        #pdfs-slider::-moz-range-thumb       { background: var(--accent-blue); }
-        #pages-slider::-moz-range-thumb       { background: var(--accent-pink); }
 
         /* ── Results ── */
         .results {
@@ -201,16 +227,17 @@
 
         .result-card {
             background: var(--bg-card);
-            border: 1px solid rgba(79, 195, 247, 0.1);
-            border-radius: 16px;
+            border: 1px solid rgba(100, 100, 180, 0.08);
+            border-radius: 20px;
             padding: 28px;
             text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 16px var(--shadow-soft);
         }
 
         .result-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 12px 40px var(--shadow-medium);
         }
 
         .result-card h4 {
@@ -252,9 +279,10 @@
         /* ── Breakdown Panel ── */
         .breakdown {
             background: var(--bg-card);
-            border: 1px solid rgba(79, 195, 247, 0.1);
-            border-radius: 16px;
+            border: 1px solid rgba(100, 100, 180, 0.08);
+            border-radius: 20px;
             padding: 32px;
+            box-shadow: 0 2px 16px var(--shadow-soft);
         }
 
         .breakdown h3 {
@@ -273,7 +301,7 @@
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
         .breakdown-item span:first-child {
@@ -299,7 +327,7 @@
         }
 
         .cost-bar-wrapper {
-            background: var(--slider-track);
+            background: var(--dial-track);
             border-radius: 8px;
             height: 32px;
             position: relative;
@@ -327,6 +355,7 @@
             .results  { grid-template-columns: 1fr; }
             .breakdown-grid { grid-template-columns: 1fr; }
             header h1 { font-size: 1.8rem; }
+            .dial-wrapper { width: 140px; height: 140px; }
         }
     </style>
 </head>
@@ -337,33 +366,57 @@
 <div class="container">
     <header>
         <h1>PDF Parsing Cost Calculator</h1>
-        <p>Adjust the sliders below to explore estimated costs based on volume, page count, and document complexity.</p>
+        <p>Spin the dials below to explore estimated costs based on volume, page count, and document complexity.</p>
     </header>
 
     <!-- ── Controls ── -->
     <div class="controls">
         <div class="control-card">
-            <div class="control-label">
-                <h3>PDFs per Month</h3>
-                <span class="control-value value-blue" id="pdfs-value">50</span>
+            <h3>PDFs per Month</h3>
+            <div class="dial-wrapper" id="pdfs-dial" data-min="1" data-max="1000" data-value="50" data-color="var(--accent-blue)">
+                <svg class="dial-svg" viewBox="0 0 160 160">
+                    <circle class="dial-track" cx="80" cy="80" r="65"/>
+                    <circle class="dial-fill" cx="80" cy="80" r="65" stroke="var(--accent-blue)"/>
+                    <circle class="dial-knob" cx="80" cy="15" r="10" stroke="var(--accent-blue)"/>
+                </svg>
+                <div class="dial-center">
+                    <div class="dial-value value-blue" id="pdfs-value">50</div>
+                    <div class="dial-unit">PDFs</div>
+                </div>
             </div>
-            <input type="range" id="pdfs-slider" min="1" max="1000" value="50">
+            <div class="dial-hint">Drag to spin</div>
         </div>
 
         <div class="control-card">
-            <div class="control-label">
-                <h3>Pages per PDF</h3>
-                <span class="control-value value-pink" id="pages-value">5</span>
+            <h3>Pages per PDF</h3>
+            <div class="dial-wrapper" id="pages-dial" data-min="1" data-max="1000" data-value="5" data-color="var(--accent-pink)">
+                <svg class="dial-svg" viewBox="0 0 160 160">
+                    <circle class="dial-track" cx="80" cy="80" r="65"/>
+                    <circle class="dial-fill" cx="80" cy="80" r="65" stroke="var(--accent-pink)"/>
+                    <circle class="dial-knob" cx="80" cy="15" r="10" stroke="var(--accent-pink)"/>
+                </svg>
+                <div class="dial-center">
+                    <div class="dial-value value-pink" id="pages-value">5</div>
+                    <div class="dial-unit">Pages</div>
+                </div>
             </div>
-            <input type="range" id="pages-slider" min="1" max="1000" value="5">
+            <div class="dial-hint">Drag to spin</div>
         </div>
 
-        <div class="control-card full-width">
-            <div class="control-label">
-                <h3>Document Complexity</h3>
-                <span class="control-value value-purple" id="complexity-value">1</span>
+        <div class="control-card">
+            <h3>Document Complexity</h3>
+            <div class="dial-wrapper" id="complexity-dial" data-min="1" data-max="10" data-value="1" data-color="var(--accent-purple)">
+                <svg class="dial-svg" viewBox="0 0 160 160">
+                    <circle class="dial-track" cx="80" cy="80" r="65"/>
+                    <circle class="dial-fill" cx="80" cy="80" r="65" stroke="var(--accent-purple)"/>
+                    <circle class="dial-knob" cx="80" cy="15" r="10" stroke="var(--accent-purple)"/>
+                </svg>
+                <div class="dial-center">
+                    <div class="dial-value value-purple" id="complexity-value">1</div>
+                    <div class="dial-unit">Level</div>
+                </div>
             </div>
-            <input type="range" id="complexity-slider" min="1" max="10" value="1">
+            <div class="dial-hint">Drag to spin</div>
             <div class="complexity-description" id="complexity-desc">
                 Simple table data (one product per row)
             </div>
@@ -447,7 +500,7 @@
     // ── Bubbles ──
     (function createBubbles() {
         const container = document.getElementById('bubbles');
-        const colors = ['#4fc3f7', '#b388ff', '#f48fb1', '#69f0ae', '#ffb74d'];
+        const colors = ['#4a90d9', '#9b6ddb', '#e06b9a', '#3db87a', '#e09050'];
         for (let i = 0; i < 30; i++) {
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
@@ -477,34 +530,143 @@
         10: "Highly complex (nested tables, images, mixed layouts)"
     };
 
-    // ── Elements ──
-    const pdfsSlider       = document.getElementById('pdfs-slider');
-    const pagesSlider      = document.getElementById('pages-slider');
-    const complexitySlider = document.getElementById('complexity-slider');
+    // ── Dial Controller ──
+    const CIRCUMFERENCE = 2 * Math.PI * 65; // r=65 matches SVG
 
+    class Dial {
+        constructor(el, onChange) {
+            this.el = el;
+            this.min = parseInt(el.dataset.min);
+            this.max = parseInt(el.dataset.max);
+            this.value = parseInt(el.dataset.value);
+            this.onChange = onChange;
+
+            this.svg = el.querySelector('.dial-svg');
+            this.fill = el.querySelector('.dial-fill');
+            this.knob = el.querySelector('.dial-knob');
+
+            // Set up stroke dash for arc rendering
+            this.fill.style.strokeDasharray = CIRCUMFERENCE;
+            this.render();
+
+            // Pointer events
+            this.dragging = false;
+            this.lastAngle = null;
+
+            el.addEventListener('pointerdown', (e) => this.onDown(e));
+            window.addEventListener('pointermove', (e) => this.onMove(e));
+            window.addEventListener('pointerup', () => this.onUp());
+
+            // Scroll wheel support
+            el.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const range = this.max - this.min;
+                // Scale step size based on range
+                let step = Math.max(1, Math.round(range / 100));
+                if (e.deltaY < 0) {
+                    this.value = Math.min(this.max, this.value + step);
+                } else {
+                    this.value = Math.max(this.min, this.value - step);
+                }
+                this.render();
+                this.onChange();
+            }, { passive: false });
+        }
+
+        // Get angle (in radians) of pointer relative to dial center
+        getAngle(e) {
+            const rect = this.el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            return Math.atan2(e.clientY - cy, e.clientX - cx);
+        }
+
+        onDown(e) {
+            this.dragging = true;
+            this.lastAngle = this.getAngle(e);
+            this.el.setPointerCapture(e.pointerId);
+        }
+
+        onMove(e) {
+            if (!this.dragging) return;
+            const angle = this.getAngle(e);
+            let delta = angle - this.lastAngle;
+
+            // Normalise to [-PI, PI] to handle wrap-around
+            if (delta > Math.PI) delta -= 2 * Math.PI;
+            if (delta < -Math.PI) delta += 2 * Math.PI;
+
+            this.lastAngle = angle;
+
+            // Convert angular delta to value delta
+            // A full revolution = full range
+            const range = this.max - this.min;
+            const valueDelta = (delta / (2 * Math.PI)) * range;
+
+            let newValue = this.value + valueDelta;
+            newValue = Math.max(this.min, Math.min(this.max, newValue));
+
+            // Only update if integer value changed (for snappy feel)
+            if (Math.round(newValue) !== this.value) {
+                this.value = Math.round(newValue);
+                this.render();
+                this.onChange();
+            } else {
+                // Store fractional progress for smooth dragging
+                this._fractional = newValue;
+            }
+        }
+
+        onUp() {
+            this.dragging = false;
+            this.lastAngle = null;
+            this._fractional = null;
+        }
+
+        render() {
+            const pct = (this.value - this.min) / (this.max - this.min);
+            const offset = CIRCUMFERENCE * (1 - pct);
+            this.fill.style.strokeDashoffset = offset;
+
+            // Position knob along the arc
+            // Angle starts at top (since SVG is rotated -90deg, 0 deg = top)
+            const knobAngle = pct * 2 * Math.PI;
+            const kx = 80 + 65 * Math.cos(knobAngle);
+            const ky = 80 + 65 * Math.sin(knobAngle);
+            this.knob.setAttribute('cx', kx);
+            this.knob.setAttribute('cy', ky);
+        }
+    }
+
+    // ── Display elements ──
     const pdfsValue       = document.getElementById('pdfs-value');
     const pagesValue      = document.getElementById('pages-value');
     const complexityValue = document.getElementById('complexity-value');
     const complexityDesc  = document.getElementById('complexity-desc');
 
+    // ── Create dials ──
+    const pdfsDial       = new Dial(document.getElementById('pdfs-dial'), recalculate);
+    const pagesDial      = new Dial(document.getElementById('pages-dial'), recalculate);
+    const complexityDial = new Dial(document.getElementById('complexity-dial'), recalculate);
+
     // ── Debounced API call ──
     let debounceTimer;
 
     function recalculate() {
+        // Update displayed values immediately
+        pdfsValue.textContent       = pdfsDial.value.toLocaleString();
+        pagesValue.textContent      = pagesDial.value.toLocaleString();
+        complexityValue.textContent = complexityDial.value;
+        complexityDesc.textContent  = LABELS[complexityDial.value];
+
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(fetchResults, 60);
     }
 
     async function fetchResults() {
-        const complexity = parseInt(complexitySlider.value);
-        const numPdfs    = parseInt(pdfsSlider.value);
-        const pages      = parseInt(pagesSlider.value);
-
-        // Update displayed values immediately
-        pdfsValue.textContent       = numPdfs.toLocaleString();
-        pagesValue.textContent      = pages.toLocaleString();
-        complexityValue.textContent = complexity;
-        complexityDesc.textContent  = LABELS[complexity];
+        const complexity = complexityDial.value;
+        const numPdfs    = pdfsDial.value;
+        const pages      = pagesDial.value;
 
         try {
             const res = await fetch('/api/calculate', {
@@ -551,12 +713,8 @@
         return '$' + val.toFixed(2);
     }
 
-    // ── Event listeners ──
-    pdfsSlider.addEventListener('input', recalculate);
-    pagesSlider.addEventListener('input', recalculate);
-    complexitySlider.addEventListener('input', recalculate);
-
     // Initial load
+    recalculate();
     fetchResults();
 </script>
 </body>
