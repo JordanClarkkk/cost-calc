@@ -15,9 +15,9 @@ COMPLEXITY_LABELS = {
     10: "Highly complex (nested tables, images, mixed layouts)",
 }
 
-# Derived from: 5-page simple PDF costs $0.05 - $0.16
-BASE_COST_PER_PAGE_LOW = 0.01    # $0.05 / 5 pages
-BASE_COST_PER_PAGE_HIGH = 0.032  # $0.16 / 5 pages
+# ~$0.01 per page base rate; complexity multiplier (1x–3x) drives the range
+BASE_COST_PER_PAGE_LOW = 0.01
+BASE_COST_PER_PAGE_HIGH = 0.01
 
 # Complexity 1 = 1.0x, Complexity 10 = 3.0x (linear)
 COMPLEXITY_MULTIPLIER_MIN = 1.0
