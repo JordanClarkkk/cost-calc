@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Models</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #f0f2f8;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8f9ff;
+            --accent-blue: #4a90d9;
+            --accent-purple: #9b6ddb;
+            --accent-pink: #e06b9a;
+            --accent-green: #3db87a;
+            --accent-orange: #e09050;
+            --accent-teal: #2bbfa8;
+            --text-primary: #2d2d3f;
+            --text-muted: #7a7a9b;
+            --shadow-soft: rgba(100, 100, 180, 0.08);
+            --shadow-medium: rgba(100, 100, 180, 0.12);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Bubble Background ── */
+        .bubbles-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.07;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(100vh) scale(0.3); opacity: 0; }
+            10%  { opacity: 0.07; }
+            90%  { opacity: 0.07; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ── Layout ── */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 32px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-blue);
+        }
+
+        .back-link svg {
+            transition: transform 0.2s;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        /* ── Header ── */
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* ── Notice Banner ── */
+        .notice {
+            background: rgba(74, 144, 217, 0.07);
+            border: 1px solid rgba(74, 144, 217, 0.2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            text-align: center;
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 24px 0 40px;
+        }
+
+        /* ── Model Grid ── */
+        .models-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Model 3 spans full width to highlight it as leading candidate */
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(100, 100, 180, 0.1);
+            border-radius: 20px;
+            padding: 28px 28px 24px;
+            box-shadow: 0 2px 16px var(--shadow-soft);
+            transition: box-shadow 0.3s, transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card:hover {
+            box-shadow: 0 8px 40px var(--shadow-medium);
+            transform: translateY(-3px);
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .model-card[data-accent="blue"]::before   { background: var(--accent-blue); }
+        .model-card[data-accent="purple"]::before { background: var(--accent-purple); }
+        .model-card[data-accent="green"]::before  { background: var(--accent-green); }
+        .model-card[data-accent="orange"]::before { background: var(--accent-orange); }
+        .model-card[data-accent="pink"]::before   { background: var(--accent-pink); }
+
+        /* ── Card Header ── */
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .model-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .model-card[data-accent="blue"]   .model-number { background: rgba(74,144,217,0.12);  color: var(--accent-blue); }
+        .model-card[data-accent="purple"] .model-number { background: rgba(155,109,219,0.12); color: var(--accent-purple); }
+        .model-card[data-accent="green"]  .model-number { background: rgba(61,184,122,0.12);  color: var(--accent-green); }
+        .model-card[data-accent="orange"] .model-number { background: rgba(224,144,80,0.12);  color: var(--accent-orange); }
+        .model-card[data-accent="pink"]   .model-number { background: rgba(224,107,154,0.12); color: var(--accent-pink); }
+
+        .card-title-group {
+            flex: 1;
+        }
+
+        .model-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .model-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── Badge ── */
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-current {
+            background: rgba(74,144,217,0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(74,144,217,0.3);
+        }
+
+        .badge-norm {
+            background: rgba(61,184,122,0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(61,184,122,0.3);
+        }
+
+        /* ── Description ── */
+        .model-description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
+        /* ── Pros / Cons ── */
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .pros, .cons {
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .pros { background: rgba(61,184,122,0.06); }
+        .cons { background: rgba(224,80,80,0.05); }
+
+        .pros-cons-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        .pros .pros-cons-title { color: var(--accent-green); }
+        .cons .pros-cons-title { color: #d05555; }
+
+        .pros-cons-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .pros-cons-list li {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 6px;
+            line-height: 1.4;
+        }
+
+        .pros-cons-list li::before {
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+
+        .pros .pros-cons-list li::before {
+            content: '✓';
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .cons .pros-cons-list li::before {
+            content: '✗';
+            color: #d05555;
+            font-weight: 700;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .models-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.8rem; }
+            .pros-cons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bubbles-container" id="bubbles"></div>
+
+<div class="container">
+    <a href="/" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 3L5 8l5 5"/>
+        </svg>
+        Back to Cost Calculator
+    </a>
+
+    <header>
+        <h1>Pricing Model Scenarios</h1>
+        <p>Five models under consideration as we move from a fixed-fee structure to a hybrid approach. No decision has been made.</p>
+    </header>
+
+    <div class="notice">
+        These are reference points for understanding tradeoffs — the final model will likely be a hybrid.
+    </div>
+
+    <div class="models-grid">
+
+        <!-- Model 1 -->
+        <div class="model-card" data-accent="blue">
+            <div class="card-header">
+                <div class="model-number">1</div>
+                <div class="card-title-group">
+                    <div class="model-name">Connection-Based Flat Tiers</div>
+                    <div class="model-subtitle">Fixed monthly fee based on mapping bundles</div>
+                </div>
+                <span class="badge badge-current">Current Beta</span>
+            </div>
+            <p class="model-description">
+                Customers pay a fixed monthly fee determined by the number of active mappings, sold in bundles.
+                An optional soft cap via credits could push this closer to Models 3 or 5.
+            </p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <div class="pros-cons-title">Pros</div>
+                    <ul class="pros-cons-list">
+                        <li>Simple to sell and budget for</li>
+                        <li>Predictable revenue</li>
+                        <li>Low friction onboarding</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <div class="pros-cons-title">Cons</div>
+                    <ul class="pros-cons-list">
+                        <li>Ignores actual cost to serve</li>
+                        <li>Breaks for distributors &amp; heavy users</li>
+                        <li>Margin risk at high volume</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model 2 -->
+        <div class="model-card" data-accent="purple">
+            <div class="card-header">
+                <div class="model-number">2</div>
+                <div class="card-title-group">
+                    <div class="model-name">Tiered Pricing with Feature Gating</div>
+                    <div class="model-subtitle">Classic SaaS tiers — Basic / Advanced / Enterprise</div>
+                </div>
+            </div>
+            <p class="model-description">
+                Larger jumps between tiers unlock more connections and features.
+                Encourages upsell but introduces cliff pricing: moving from 10 to 11 connections could mean a significant price increase.
+            </p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <div class="pros-cons-title">Pros</div>
+                    <ul class="pros-cons-list">
+                        <li>Familiar SaaS sales motion</li>
+                        <li>Predictable recurring revenue</li>
+                        <li>Feature differentiation enables upsell</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <div class="pros-cons-title">Cons</div>
+                    <ul class="pros-cons-list">
+                        <li>Cliff pricing triggers gaming &amp; discounts</li>
+                        <li>Doesn't defend margins without usage guardrails</li>
+                        <li>Customers feel punished at tier edges</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model 3 -->
+        <div class="model-card" data-accent="green">
+            <div class="card-header">
+                <div class="model-number">3</div>
+                <div class="card-title-group">
+                    <div class="model-name">High Fixed Base + Low Metered Usage</div>
+                    <div class="model-subtitle">Generous baseline included; cheap overages</div>
+                </div>
+                <span class="badge badge-norm">AI SaaS Norm</span>
+            </div>
+            <p class="model-description">
+                A higher base fee covers platform access and a generous processing baseline.
+                Additional usage beyond that baseline is metered at a low per-unit rate.
+                Most cost is predictable for the client; overages are rarely a surprise.
+            </p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <div class="pros-cons-title">Pros</div>
+                    <ul class="pros-cons-list">
+                        <li>Predictable for the customer</li>
+                        <li>Strong margin protection at baseline</li>
+                        <li>Becoming the norm in AI-powered SaaS</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <div class="pros-cons-title">Cons</div>
+                    <ul class="pros-cons-list">
+                        <li>Hard sell for light or seasonal users</li>
+                        <li>Customers feel they overpay in quiet months</li>
+                        <li>High base can block SMB entry</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model 4 -->
+        <div class="model-card" data-accent="orange">
+            <div class="card-header">
+                <div class="model-number">4</div>
+                <div class="card-title-group">
+                    <div class="model-name">Pure Pay-As-You-Go</div>
+                    <div class="model-subtitle">No subscription — pay per processing run</div>
+                </div>
+            </div>
+            <p class="model-description">
+                No subscription fee. Customers pay per processing run, priced by volume and complexity.
+                Standard for API and developer tools, but unusual in this market segment.
+            </p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <div class="pros-cons-title">Pros</div>
+                    <ul class="pros-cons-list">
+                        <li>Perfect cost alignment for the company</li>
+                        <li>Safest for margins at any volume</li>
+                        <li>Zero commitment lowers barrier to try</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <div class="pros-cons-title">Cons</div>
+                    <ul class="pros-cons-list">
+                        <li>Unpredictable bills worry CFOs</li>
+                        <li>Zero revenue during idle months</li>
+                        <li>Hardest to sell in this market segment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model 5 -->
+        <div class="model-card" data-accent="pink">
+            <div class="card-header">
+                <div class="model-number">5</div>
+                <div class="card-title-group">
+                    <div class="model-name">Low Fixed Base + High Metered Usage</div>
+                    <div class="model-subtitle">Cheap entry; usage-heavy revenue model</div>
+                </div>
+            </div>
+            <p class="model-description">
+                A low base fee gives cheap platform access and a small included baseline.
+                Usage beyond that is metered at a higher per-unit rate.
+                Revenue depends heavily on actual usage — thin in quiet months, strong when usage is high.
+            </p>
+            <div class="pros-cons">
+                <div class="pros">
+                    <div class="pros-cons-title">Pros</div>
+                    <ul class="pros-cons-list">
+                        <li>Low entry barrier, easy to sell</li>
+                        <li>Incentivises driving usage growth</li>
+                        <li>Revenue scales with customer success</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <div class="pros-cons-title">Cons</div>
+                    <ul class="pros-cons-list">
+                        <li>Risk of surprise charges if not communicated</li>
+                        <li>Thin margins in low-usage months</li>
+                        <li>Customers may self-limit to avoid overages</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function createBubbles() {
+        const container = document.getElementById('bubbles');
+        const colors = ['#4a90d9', '#9b6ddb', '#e06b9a', '#3db87a', '#e09050'];
+        for (let i = 0; i < 30; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 120 + 30;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = Math.random() * 100 + '%';
+            bubble.style.background = color;
+            bubble.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            bubble.style.animationDelay = (Math.random() * 20) + 's';
+            container.appendChild(bubble);
+        }
+    })();
+</script>
+</body>
+</html>

@@ -487,6 +487,25 @@
     <header>
         <h1>PDF Parsing Cost Calculator</h1>
         <p>Spin the dials below to explore estimated costs based on volume, page count, and document complexity.</p>
+        <a href="/pricing-models" style="
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-top: 20px;
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            padding: 8px 18px;
+            border: 1px solid rgba(100,100,180,0.2);
+            border-radius: 20px;
+            background: var(--bg-card);
+            transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.color='var(--accent-blue)';this.style.borderColor='rgba(74,144,217,0.4)';this.style.boxShadow='0 4px 16px var(--shadow-medium)'"
+           onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='rgba(100,100,180,0.2)';this.style.boxShadow='none'">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="14" height="11" rx="2"/>
+                <path d="M1 7h14"/>
+                <path d="M5 3V2M11 3V2"/>
+            </svg>
+            View Pricing Model Scenarios
+        </a>
     </header>
 
     <!-- ── Controls ── -->

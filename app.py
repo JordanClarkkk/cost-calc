@@ -35,6 +35,11 @@ def index():
     return render_template("index.html", complexity_labels=COMPLEXITY_LABELS)
 
 
+@app.route("/pricing-models")
+def pricing_models():
+    return render_template("pricing_models.html")
+
+
 @app.route("/api/calculate", methods=["POST"])
 def calculate():
     data = request.get_json()
